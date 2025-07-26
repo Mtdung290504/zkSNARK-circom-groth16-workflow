@@ -8,3 +8,5 @@ Nếu cần test 1 mạch nào đó:
 
 Chạy lệnh: `node .\complier\ <đường dẫn đến thư mục chứa mạch>`
     Ví dụ: `node .\complier\ .\circuits\all_non_negative\`
+
+Chạy xong thì trong thư mục chứa mạch sinh ra 1 thư mục output, xem output/public input trong file public.json trong thư mục đó
