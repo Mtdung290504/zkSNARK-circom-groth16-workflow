@@ -1,7 +1,5 @@
 pragma circom 2.1.6;
 
-include "../../../circomlib/circuits/poseidon.circom";
-
 template MerkleRootWithTimestamp(n) {
     assert(n > 0);
     assert(n & (n - 1) == 0); // n phải là lũy thừa của 2

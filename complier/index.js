@@ -30,23 +30,6 @@ function quote(p) {
 }
 
 /**
- * Kiểm tra dependencies có được cài đặt chưa
- */
-function checkDependencies() {
-	console.log('> [Info] Checking dependencies...');
-
-	const deps = ['circom', 'snarkjs'];
-	for (const dep of deps) {
-		try {
-			execSync(`${dep} --version`, { stdio: 'pipe' });
-			console.log(`> [✓] ${dep} is installed`);
-		} catch (error) {
-			throw new Error(`Missing dependency: ${dep}. Please install it first.`);
-		}
-	}
-}
-
-/**
  * Thực thi command line và hiển thị output
  * @param {string} cmd - Command cần thực thi
  * @param {string} workingDir - Thư mục làm việc (default: PROJECT_ROOT)
@@ -377,7 +360,7 @@ function setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared) {
 	// Hiển thị thông tin debug
 	printDebugInfo(outputDir, vkey, pub, proof);
 
-	// Bước 6: Verify proof
+	// Bước 6: Verify proof (Sau này cắt bước qua client)
 	console.log('\n\n--> [Info] Step 6: Verifying proof');
 	run(`npx snarkjs groth16 verify ${quote(vkey)} ${quote(pub)} ${quote(proof)}`);
 
@@ -452,9 +435,6 @@ function runZKPWorkflow(inputCircuitDir) {
 
 	try {
 		console.log('> [Info] Starting ZK-SNARK workflow...\n');
-
-		// Kiểm tra dependencies (Đang lỗi)
-		// checkDependencies();
 
 		// Resolve đường dẫn circuit từ input của user
 		const circuitDir = resolveCircuitPath(inputCircuitDir);

@@ -1,4 +1,4 @@
 Đọc todo.md, setup hoàn chỉnh hết mới có thể chạy
-Mạch chính nằm trong thư mục `./circuits/PoR_ok`, chạy `node .\complier\ .\circuits\PoR_ok`
+Mạch chính nằm trong thư mục `./circuits/prove_PoR/`, chạy `node .\complier\ .\circuits\prove_PoR\`
 
-*Note:* Thư mục `templates` chứa các mạch khác đã bỏ hàm main và thay đổi đường dẫn include circomlib, sẽ nghĩ cách tối ưu sau
+*Note:* Thư mục `templates` chứa các mạch khác đã bỏ hàm main và bỏ include, sẽ nghĩ cách tự động hóa sau

@@ -1,8 +1,5 @@
 pragma circom 2.1.6;
 
-// Import comparator để so sánh số nguyên >=
-include "../../../circomlib/circuits/comparators.circom";
-
 // Template kiểm tra toàn bộ số dư người dùng đều không âm
 template AllNonNegative(n) {
     // Mảng input users: mỗi phần tử gồm [user_id, balance]

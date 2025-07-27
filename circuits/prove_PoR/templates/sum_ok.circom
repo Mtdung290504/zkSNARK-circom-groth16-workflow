@@ -1,6 +1,5 @@
 pragma circom 2.1.6;
 
-// Note: chưa test với bigint
 template SumBalances(n) {
     signal input balances[n];       // Private input: danh sách số dư
     signal input expectedSum;       // Public input: tổng công khai
