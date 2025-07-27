@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../circomlib/circuits/poseidon.circom";
+include "../../../circomlib/circuits/poseidon.circom";
 
 template MerkleRootWithTimestamp(n) {
     assert(n > 0);
@@ -61,5 +61,3 @@ function log_2(x) {
     }
     return r;
 }
-
-component main { public [ timestamp, finalHash ] } = MerkleRootWithTimestamp(4);

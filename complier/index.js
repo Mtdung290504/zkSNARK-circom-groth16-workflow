@@ -445,6 +445,7 @@ function printDebugInfo(outputDir, vkey, pub, proof) {
 /**
  * Hàm chính để chạy toàn bộ quy trình ZKP
  * @param {string} inputCircuitDir - Đường dẫn từ user
+ * @returns {boolean} - Chạy thành công hay fail, nếu chạy fail sinh bằng chứng thất bại
  */
 function runZKPWorkflow(inputCircuitDir) {
 	const startTime = Date.now();

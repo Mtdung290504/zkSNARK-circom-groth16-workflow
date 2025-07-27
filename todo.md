@@ -1,9 +1,10 @@
 *Quan trọng*: Cần setup môi trường theo link này trước: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh
 
 *Quan trọng 2*: Cần có mạng để chạy, vì phase trusted setup nó cần tạo ra powers_of_tau đủ chịu được ràng buộc
-    mà máy thường chạy thì có khi không nổi nên nó sẽ tải file sẵn có trên github về tự động, nên nếu offline sẽ bị lỏ
-    những file tải thêm mở thư mục ./compiler/powers_of_tau/ để xem
-    con số sau cùng của tên file (tạm gọi là k) sẽ đại diện cho nó hỗ trợ cho mạch có tối đa 2^k constraints
+    mà máy thường chạy thì có khi không nổi nên nó sẽ tải file sẵn có trên storage người ta đã làm sẵn về tự động
+    nếu máy offline sẽ tự sinh, mà tự sinh thì để ý kẻo cháy máy
+    những file tải thêm mở thư mục `./compiler/powers_of_tau/` để xem
+        con số sau cùng của tên file (tạm gọi là k) sẽ đại diện cho nó hỗ trợ cho mạch có tối đa 2^k constraints
 
 Nếu cần test 1 mạch nào đó:
     - Trong thư mục `./circuits/` tạo 1 folder tên gì thì tùy (T có làm ví dụ với folder `all_non_negative`)
