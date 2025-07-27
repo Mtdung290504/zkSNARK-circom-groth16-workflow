@@ -30,6 +30,23 @@ function quote(p) {
 }
 
 /**
+ * Kiểm tra dependencies có được cài đặt chưa
+ */
+function checkDependencies() {
+	console.log('> [Info] Checking dependencies...');
+
+	const deps = ['circom', 'snarkjs'];
+	for (const dep of deps) {
+		try {
+			execSync(`${dep} --version`, { stdio: 'pipe' });
+			console.log(`> [✓] ${dep} is installed`);
+		} catch (error) {
+			throw new Error(`Missing dependency: ${dep}. Please install it first.`);
+		}
+	}
+}
+
+/**
  * Thực thi command line và hiển thị output
  * @param {string} cmd - Command cần thực thi
  * @param {string} workingDir - Thư mục làm việc (default: PROJECT_ROOT)
@@ -46,54 +63,183 @@ function run(cmd, workingDir = PROJECT_ROOT) {
 }
 
 /**
- * Kiểm tra và tạo Powers of Tau ceremony (trusted setup chung)
- * Đây là bước chuẩn bị cho việc tạo proof, chỉ cần làm 1 lần và có thể dùng chung cho nhiều circuit
+ * Lấy số constraints thực tế từ file .r1cs
+ * @param {string} r1csPath - Đường dẫn file .r1cs
+ * @returns {number} - Số constraints thực tế
  */
-function ensurePtau() {
-	console.log('> [Info] Checking Powers of Tau setup...');
+function getActualConstraintCount(r1csPath) {
+	try {
+		// Sử dụng snarkjs để đọc thông tin từ r1cs
+		const output = execSync(`npx snarkjs r1cs info ${quote(r1csPath)}`, {
+			encoding: 'utf8',
+			stdio: 'pipe',
+		});
 
-	// Đặt thư mục ptau trong compiler folder để dễ quản lý
+		// Parse output để lấy số constraints
+		const constraintMatch = output.match(/# of constraints:\s*(\d+)/i);
+		if (constraintMatch) {
+			return parseInt(constraintMatch[1]);
+		}
+
+		console.log('> [Warning] Could not parse constraint count from r1cs info');
+		return 0;
+	} catch (error) {
+		console.log('> [Warning] Could not get actual constraint count:', error.message);
+		return 0;
+	}
+}
+
+/**
+ * Ước tính số constraints cần thiết từ file .circom
+ * @param {string} circomPath - Đường dẫn file .circom
+ * @returns {number} - Power of 2 cần thiết (10, 15, 20, etc.)
+ */
+function estimateConstraints(circomPath) {
+	try {
+		const content = fs.readFileSync(circomPath, 'utf8');
+
+		// Đếm các thành phần quan trọng
+		const poseidonCount = (content.match(/Poseidon\s*\(/g) || []).length;
+		const sha256Count = (content.match(/Sha256\s*\(/g) || []).length;
+		const componentCount = (content.match(/component\s+\w+/g) || []).length;
+		const templateCount = (content.match(/template\s+\w+/g) || []).length;
+		const signalCount = (content.match(/signal\s+(input|output|private)?\s*\w+/g) || []).length;
+
+		// Ước tính constraints theo từng loại (dựa trên thực tế)
+		let estimatedConstraints = 0;
+
+		// Poseidon hash rất tốn constraints
+		estimatedConstraints += poseidonCount * 1200; // ~1200 constraints per Poseidon
+
+		// SHA256 cũng tốn nhiều
+		estimatedConstraints += sha256Count * 25000; // ~25k constraints per SHA256
+
+		// Các component khác
+		estimatedConstraints += componentCount * 50;
+		estimatedConstraints += templateCount * 100;
+		estimatedConstraints += signalCount * 10;
+
+		// Minimum baseline
+		estimatedConstraints = Math.max(estimatedConstraints, 1000);
+
+		// Thêm buffer 50% để đảm bảo
+		estimatedConstraints = Math.ceil(estimatedConstraints * 1.5);
+
+		// Tìm power of 2 phù hợp
+		let power = 10; // 2^10 = 1024
+		while (1 << power < estimatedConstraints && power < 25) {
+			power++;
+		}
+
+		console.log(`> [Info] Circuit analysis:`);
+		console.log(`>   - Poseidon hashers: ${poseidonCount}`);
+		console.log(`>   - SHA256 hashers: ${sha256Count}`);
+		console.log(`>   - Total components: ${componentCount}`);
+		console.log(`> [Info] Estimated constraints: ${estimatedConstraints}`);
+		console.log(`> [Info] Using powers of tau: 2^${power} = ${1 << power}`);
+
+		return power;
+	} catch (error) {
+		console.log('> [Warning] Could not estimate constraints, using default 2^15');
+		return 15; // Default to 2^15 = 32768 for safety
+	}
+}
+
+/**
+ * Download ptau file từ Hermez nếu chưa có
+ * @param {number} power - Power of 2
+ * @param {string} ptauDir - Thư mục chứa ptau files
+ * @returns {string} - Đường dẫn file ptau đã download
+ */
+function downloadHermezPtau(power, ptauDir) {
+	const ptauFile = path.join(ptauDir, `powersOfTau28_hez_final_${power.toString().padStart(2, '0')}.ptau`);
+
+	if (fs.existsSync(ptauFile)) {
+		console.log(`> [Info] Hermez ptau file already exists (2^${power})`);
+		return ptauFile;
+	}
+
+	console.log(`> [Info] Downloading Hermez ptau file for 2^${power} constraints...`);
+	// https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_08.ptau
+	const url = `https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_${power
+		.toString()
+		.padStart(2, '0')}.ptau`;
+
+	try {
+		// Sử dụng curl hoặc wget để download
+		const downloadCmd =
+			process.platform === 'win32' ? `curl -L "${url}" -o ${quote(ptauFile)}` : `wget "${url}" -O ${quote(ptauFile)}`;
+
+		console.log(`> [Info] Downloading from: ${url}`);
+		run(downloadCmd);
+
+		if (fs.existsSync(ptauFile)) {
+			const fileSize = (fs.statSync(ptauFile).size / (1024 * 1024)).toFixed(2);
+			console.log(`> [Success] Downloaded ptau file (${fileSize} MB)`);
+			return ptauFile;
+		} else {
+			throw new Error('Download failed - file not found after download');
+		}
+	} catch (error) {
+		console.log(`> [Warning] Failed to download Hermez ptau: ${error.message}`);
+		console.log('> [Info] Falling back to generating ptau locally...');
+		return null;
+	}
+}
+
+/**
+ * Kiểm tra và chuẩn bị Powers of Tau ceremony
+ * @param {number} power - Power of 2 (default: 15 for 2^15 constraints)
+ */
+function ensurePtau(power = 15) {
+	console.log(`> [Info] Preparing Powers of Tau setup (2^${power})...`);
+
 	const ptauDir = path.join(__dirname, 'powers_of_tau');
-	const ptauFile = path.join(ptauDir, 'pot10_final.ptau');
-	const ptauTemp = path.join(ptauDir, 'pot10_temp.ptau');
-	const ptauPrepared = path.join(ptauDir, 'pot10_final_prepared.ptau');
-
-	// Tạo thư mục ptau nếu chưa có
 	if (!fs.existsSync(ptauDir)) {
 		fs.mkdirSync(ptauDir, { recursive: true });
 	}
 
-	if (!fs.existsSync(ptauFile)) {
-		console.log('> [Info] Creating Powers of Tau ceremony...');
+	// Thử download từ Hermez trước
+	let ptauFile = downloadHermezPtau(power, ptauDir);
 
-		// Bước 1: Tạo ceremony ban đầu với 2^10 = 1024 constraints
-		console.log('\n\n--> [Info] Step 1: Initialize ceremony');
-		run(`npx snarkjs powersoftau new bn128 10 ${quote(ptauTemp)} -v`);
+	// Nếu download thất bại, tạo local
+	if (!ptauFile) {
+		console.log('> [Warning] Creating ptau locally (this will be slow!)');
+		const ptauTemp = path.join(ptauDir, `pot${power}_temp.ptau`);
+		ptauFile = path.join(ptauDir, `pot${power}_final.ptau`);
 
-		// Bước 2: Đóng góp entropy để bảo mật (từ file temp -> file final)
-		console.log('\n\n--> [Info] Step 2: Contributing entropy');
-		run(
-			`npx snarkjs powersoftau contribute ${quote(ptauTemp)} ${quote(
-				ptauFile
-			)} --name="MaiTienDung" --entropy="$(date)" -v`
-		);
+		if (!fs.existsSync(ptauFile)) {
+			console.log('\n--> [Info] Step 1: Initialize ceremony');
+			run(`npx snarkjs powersoftau new bn128 ${power} ${quote(ptauTemp)} -v`);
 
-		// Dọn dẹp file tạm
-		if (fs.existsSync(ptauTemp)) {
-			fs.unlinkSync(ptauTemp);
-			console.log('> [Info] Cleaned up temporary ptau file');
+			console.log('\n--> [Info] Step 2: Contributing entropy');
+			run(
+				`npx snarkjs powersoftau contribute ${quote(ptauTemp)} ${quote(
+					ptauFile
+				)} --name="MaiTienDung" --entropy="$(date)" -v`
+			);
+
+			if (fs.existsSync(ptauTemp)) {
+				fs.unlinkSync(ptauTemp);
+			}
 		}
-	} else {
-		console.log('> [Info] Powers of Tau file already exists');
 	}
 
-	// Chuẩn bị phase 2 cho Groth16 protocol
-	if (!fs.existsSync(ptauPrepared)) {
-		console.log('> [Info] Preparing phase 2 for Groth16...');
-		run(`npx snarkjs powersoftau prepare phase2 ${quote(ptauFile)} ${quote(ptauPrepared)}`);
-	} else {
-		console.log('> [Info] Phase 2 preparation already completed');
+	// Nếu file đã là 'hez_final', tức đã có phase 2 => dùng trực tiếp
+	if (path.basename(ptauFile).includes('hez_final')) {
+		console.log('> [Info] ptau file already includes Phase 2 (hez_final), skipping prepare phase2');
+		return ptauFile;
 	}
+
+	// Nếu là file tự tạo, cần prepare phase2
+	const ptauPrepared = path.join(ptauDir, `powersOfTau28_hez_final_${power.toString().padStart(2, '0')}_prepared.ptau`);
+	if (fs.existsSync(ptauPrepared)) {
+		console.log('> [Info] Prepared ptau file already exists');
+		return ptauPrepared;
+	}
+
+	console.log('> [Info] Preparing phase 2 for Groth16...');
+	run(`npx snarkjs powersoftau prepare phase2 ${quote(ptauFile)} ${quote(ptauPrepared)}`);
 
 	return ptauPrepared;
 }
@@ -102,7 +248,7 @@ function ensurePtau() {
  * Biên dịch Circom circuit thành các file cần thiết
  * @param {string} circuitDir - Thư mục chứa file .circom
  * @param {string} outputDir - Thư mục output
- * @returns {string} - Tên circuit (không có extension)
+ * @returns {Object} - {circuitName, constraintPower}
  */
 function compileCircuit(circuitDir, outputDir) {
 	console.log('> [Info] Compiling Circom circuit...');
@@ -116,14 +262,63 @@ function compileCircuit(circuitDir, outputDir) {
 	const circuitName = CIRCOM_FILE.replace('.circom', '');
 	const circomPath = path.resolve(circuitDir, CIRCOM_FILE);
 
+	// Ước tính số constraints cần thiết
+	let constraintPower = estimateConstraints(circomPath);
+
 	// Biên dịch circuit thành:
-	// - .r1cs: Rank-1 Constraint System (định nghĩa constraints)
+	// - .r1cs: Rank-1 Constraint System
 	// - .wasm: WebAssembly để tính witness
 	// - .sym: Symbol table cho debug
-	run(`circom ${quote(circomPath)} --r1cs --wasm --sym -o ${quote(outputDir)}`);
-	console.log('> [Info] Circuit compiled successfully');
+	console.log('> [Info] Compiling with optimizations...');
+	run(`circom ${quote(circomPath)} --r1cs --wasm --sym --O1 -o ${quote(outputDir)}`);
 
-	return circuitName;
+	// Kiểm tra file output
+	const r1csPath = path.join(outputDir, `${circuitName}.r1cs`);
+	const wasmPath = path.join(outputDir, `${circuitName}_js/${circuitName}.wasm`);
+
+	if (!fs.existsSync(r1csPath) || !fs.existsSync(wasmPath)) {
+		throw new Error('Circuit compilation failed - missing output files');
+	}
+
+	// Kiểm tra constraint count thực tế
+	const actualConstraints = getActualConstraintCount(r1csPath);
+	if (actualConstraints > 0) {
+		console.log(`> [Info] Actual constraints: ${actualConstraints}`);
+
+		// Tính lại power cần thiết dựa trên constraint thực tế
+		let requiredPower = 10;
+		while (1 << requiredPower < actualConstraints * 2 && requiredPower < 25) {
+			requiredPower++;
+		}
+
+		if (requiredPower > constraintPower) {
+			console.log(`> [Warning] Need higher power: 2^${requiredPower} (was estimated 2^${constraintPower})`);
+			constraintPower = requiredPower;
+		}
+	}
+
+	console.log('> [Info] Circuit compiled successfully');
+	return { circuitName, constraintPower };
+}
+
+/**
+ * Validate input file format
+ * @param {string} inputFile - Đường dẫn file input.json
+ */
+function validateInput(inputFile) {
+	console.log('> [Info] Validating input file...');
+
+	if (!fs.existsSync(inputFile)) {
+		throw new Error(`Input file not found: ${inputFile}`);
+	}
+
+	try {
+		const inputData = JSON.parse(fs.readFileSync(inputFile, 'utf8'));
+		console.log('> [Info] Input signals:', Object.keys(inputData));
+		return inputData;
+	} catch (error) {
+		throw new Error(`Invalid input JSON format: ${error.message}`);
+	}
 }
 
 /**
@@ -148,52 +343,70 @@ function setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared) {
 	const inputFile = path.resolve(circuitDir, 'input.json');
 	const genWitness = path.resolve(outputDir, `${circuitName}_js/generate_witness.js`);
 
-	// Kiểm tra file input có tồn tại
-	if (!fs.existsSync(inputFile)) {
-		throw new Error(`Input file not found: ${inputFile}`);
-	}
-	
-	// Bước 1: Groth16 setup - tạo proving và verifying keys từ R1CS và ptau
+	// Validate input
+	validateInput(inputFile);
+
+	// Bước 1: Groth16 setup
 	console.log('\n\n--> [Info] Step 1: Groth16 setup (generating keys)');
 	run(`npx snarkjs groth16 setup ${quote(r1cs)} ${quote(ptauPrepared)} ${quote(zkey0)}`);
 
-	// Bước 2: Đóng góp vào zkey để tăng tính bảo mật
+	// Bước 2: Đóng góp vào zkey
 	console.log('\n\n--> [Info] Step 2: Contributing to zkey');
 	run(`npx snarkjs zkey contribute ${quote(zkey0)} ${quote(zkeyFinal)} --name="MaiTienDung" --entropy="$(date)" -v`);
 
-	// Bước 3: Xuất verification key để verifier sử dụng
+	// Bước 3: Xuất verification key
 	console.log('\n\n--> [Info] Step 3: Exporting verification key');
 	run(`npx snarkjs zkey export verificationkey ${quote(zkeyFinal)} ${quote(vkey)}`);
 
-	// Bước 4: Tạo witness từ input (chạy circuit với input cụ thể)
+	// Bước 4: Tạo witness từ input
 	console.log('\n\n--> [Info] Step 4: Generating witness from input');
-	run(`node ${quote(genWitness)} ${quote(wasm)} ${quote(inputFile)} ${quote(witness)}`);
+
+	// Kiểm tra Node.js version compatibility
+	try {
+		run(`node ${quote(genWitness)} ${quote(wasm)} ${quote(inputFile)} ${quote(witness)}`);
+	} catch (error) {
+		console.log('> [Warning] Standard witness generation failed, trying alternative method...');
+		// Fallback method cho một số version cũ
+		run(`npx snarkjs wtns calculate ${quote(wasm)} ${quote(inputFile)} ${quote(witness)}`);
+	}
 
 	// Bước 5: Tạo proof từ witness
 	console.log('\n\n--> [Info] Step 5: Generating zero-knowledge proof');
 	run(`npx snarkjs groth16 prove ${quote(zkeyFinal)} ${quote(witness)} ${quote(proof)} ${quote(pub)}`);
 
-	// Hiển thị thông tin debug để kiểm tra
+	// Hiển thị thông tin debug
 	printDebugInfo(outputDir, vkey, pub, proof);
 
 	// Bước 6: Verify proof
 	console.log('\n\n--> [Info] Step 6: Verifying proof');
 	run(`npx snarkjs groth16 verify ${quote(vkey)} ${quote(pub)} ${quote(proof)}`);
+
+	// Cleanup intermediate files để tiết kiệm dung lượng
+	console.log('\n\n--> [Info] Cleaning up intermediate files...');
+	const filesToClean = [zkey0, witness];
+	filesToClean.forEach((file) => {
+		if (fs.existsSync(file)) {
+			fs.unlinkSync(file);
+			console.log(`> [Info] Cleaned: ${path.basename(file)}`);
+		}
+	});
 }
 
 /**
- * In thông tin debug để kiểm tra các file được tạo
- * @param {string} outputDir - Thư mục output
- * @param {string} vkey - Đường dẫn verification key
- * @param {string} pub - Đường dẫn public inputs
- * @param {string} proof - Đường dẫn proof
+ * In thông tin debug và summary
  */
 function printDebugInfo(outputDir, vkey, pub, proof) {
-	console.log('> [Debug] ===== FILE STATUS =====');
+	console.log('\n> [Debug] ===== FILE STATUS =====');
 	console.log('> [Debug] Output directory:', outputDir);
 	console.log('> [Debug] Verification Key exists:', fs.existsSync(vkey));
 	console.log('> [Debug] Public inputs exists:', fs.existsSync(pub));
 	console.log('> [Debug] Proof exists:', fs.existsSync(proof));
+
+	// File sizes
+	if (fs.existsSync(proof)) {
+		const proofSize = fs.statSync(proof).size;
+		console.log(`> [Debug] Proof file size: ${proofSize} bytes`);
+	}
 
 	// Kiểm tra nội dung public inputs
 	if (fs.existsSync(pub)) {
@@ -201,44 +414,46 @@ function printDebugInfo(outputDir, vkey, pub, proof) {
 		console.log('> [Debug] Public inputs content:', publicInputs);
 
 		try {
-			JSON.parse(publicInputs);
+			const pubData = JSON.parse(publicInputs);
+			console.log('> [Debug] Public inputs count:', pubData.length);
 			console.log('> [Debug] Public inputs JSON format: Valid');
 		} catch (e) {
 			console.log('> [Error] Public inputs JSON format: Invalid -', e.message);
 		}
 	}
 
-	// Kiểm tra proof file
-	if (fs.existsSync(proof)) {
-		try {
-			const proofContent = fs.readFileSync(proof, 'utf8');
-			JSON.parse(proofContent);
-			console.log('> [Debug] Proof JSON format: Valid');
-		} catch (e) {
-			console.log('> [Error] Proof JSON format: Invalid -', e.message);
-		}
-	}
+	// Validate JSON files
+	const jsonFiles = [
+		{ path: proof, name: 'Proof' },
+		{ path: vkey, name: 'Verification key' },
+	];
 
-	// Kiểm tra verification key
-	if (fs.existsSync(vkey)) {
-		try {
-			const vkeyContent = fs.readFileSync(vkey, 'utf8');
-			JSON.parse(vkeyContent);
-			console.log('> [Debug] Verification key JSON format: Valid');
-		} catch (e) {
-			console.log('> [Error] Verification key JSON format: Invalid -', e.message);
+	jsonFiles.forEach(({ path: filePath, name }) => {
+		if (fs.existsSync(filePath)) {
+			try {
+				JSON.parse(fs.readFileSync(filePath, 'utf8'));
+				console.log(`> [Debug] ${name} JSON format: Valid`);
+			} catch (e) {
+				console.log(`> [Error] ${name} JSON format: Invalid - ${e.message}`);
+			}
 		}
-	}
+	});
+
 	console.log('> [Debug] ===============================\n');
 }
 
 /**
  * Hàm chính để chạy toàn bộ quy trình ZKP
- * @param {string} inputCircuitDir - Đường dẫn từ user (có thể relative từ process.cwd() hoặc absolute)
+ * @param {string} inputCircuitDir - Đường dẫn từ user
  */
 function runZKPWorkflow(inputCircuitDir) {
+	const startTime = Date.now();
+
 	try {
 		console.log('> [Info] Starting ZK-SNARK workflow...\n');
+
+		// Kiểm tra dependencies (Đang lỗi)
+		// checkDependencies();
 
 		// Resolve đường dẫn circuit từ input của user
 		const circuitDir = resolveCircuitPath(inputCircuitDir);
@@ -249,7 +464,7 @@ function runZKPWorkflow(inputCircuitDir) {
 			throw new Error(`Circuit directory not found: ${circuitDir}`);
 		}
 
-		// Thiết lập thư mục output trong circuit directory
+		// Thiết lập thư mục output
 		const outputDir = path.join(circuitDir, 'output');
 
 		// Xóa và tạo lại thư mục output
@@ -260,14 +475,28 @@ function runZKPWorkflow(inputCircuitDir) {
 		console.log('> [Info] Output directory:', outputDir);
 
 		// Chạy các bước theo thứ tự
-		const ptauPrepared = ensurePtau();
-		const circuitName = compileCircuit(circuitDir, outputDir);
+		const { circuitName, constraintPower } = compileCircuit(circuitDir, outputDir);
+		const ptauPrepared = ensurePtau(constraintPower);
 		setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared);
 
-		console.log('\n> [Success] ZK-SNARK workflow completed successfully!');
+		const endTime = Date.now();
+		const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+		console.log('\n> [Success] ========== WORKFLOW COMPLETED ==========');
+		console.log(`> [Success] Circuit: ${circuitName}`);
+		console.log(`> [Success] Duration: ${duration} seconds`);
+		console.log(`> [Success] Output files in: ${outputDir}`);
+		console.log('> [Success] Files generated:');
+		console.log('> [Success]   - proof.json (ZK proof)');
+		console.log('> [Success]   - public.json (public inputs)');
+		console.log('> [Success]   - verification_key.json (for verification)');
+		console.log('> [Success] ==============================================');
+
 		return true;
 	} catch (err) {
-		console.error('\n> [Error] Workflow failed:', err.message);
+		console.error('\n> [Error] ========== WORKFLOW FAILED ==========');
+		console.error('> [Error] Reason:', err);
+		console.error('> [Error] =========================================');
 		return false;
 	}
 }
@@ -275,7 +504,7 @@ function runZKPWorkflow(inputCircuitDir) {
 // Export hàm để có thể import từ file khác
 module.exports = { runZKPWorkflow };
 
-// Nếu file được chạy trực tiếp (không require), lấy tham số từ command line
+// CLI interface
 if (require.main === module) {
 	const inputPath = process.argv[2];
 	if (!inputPath) {
@@ -290,5 +519,6 @@ if (require.main === module) {
 	console.log('> [Info] Compiler location:', __dirname);
 	console.log('> [Info] Input path:', inputPath);
 
-	runZKPWorkflow(inputPath);
+	const success = runZKPWorkflow(inputPath);
+	process.exit(success ? 0 : 1);
 }
