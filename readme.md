@@ -1,14 +1,14 @@
-*Quan trọng 1*: Cần setup môi trường theo link này trước: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh
+*Quan trọng 1*: Cần setup môi trường theo link này trước: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh và clone circomlib vào thư mục gốc của dự án: `git clone https://github.com/iden3/circomlib.git`
 
 *Quan trọng 2*:
-- Cần có mạng để chạy, vì phase trusted setup nó cần tạo ra powers_of_tau đủ chịu được số ràng buộc của mạch.
+- Rất nên có mạng để chạy, vì phase trusted setup cần tạo ra powers_of_tau đủ cho số ràng buộc của mạch.
 - Máy thường chạy thì có khi không nổi với mạch lớn nên script sẽ tải file sẵn có trên storage người ta đã làm sẵn về tự động
 - Nếu máy offline script sẽ buộc phải tự sinh powers_of_tau, mà tự sinh thì để ý `Ctrl + C` với `Task Manager` kẻo cháy máy
 - Những file tải thêm mở thư mục `compiler/powers_of_tau/` để xem. Con số sau cùng của tên file (tạm gọi là k) sẽ đại diện cho nó hỗ trợ cho mạch có tối đa 2^k constraints
 - *Những file powers_of_tau cho mạch cực lớn có thể nặng đến 9GB (với k = 32 thì phải), nhưng hiện tại các mạch đã demo chỉ mới cần - khoảng k = 14 nên download khá nhanh, cần lưu ý phần này.
 - Nếu muốn tải powers_of_tau trước mà không để script tự tải thì vào link: https://github.com/iden3/snarkjs#7-prepare-phase-2 tải về và cho vào thư mục `compiler/powers_of_tau/`.
 
-*Quan trọng 3*: Các lệnh chạy dưới đây đều cần chạy ở thư mục gốc dự án, nếu cd lung tung, chạy sẽ bị lỗi
+*Quan trọng 3*: Các lệnh chạy dưới đây đều cần chạy ở thư mục gốc dự án, nếu cd lung tung, chạy sẽ bị lỗi.
 
 Nếu cần test 1 mạch Circom nào đó:
 - Trong thư mục `circuits/` tạo 1 folder tên gì thì tùy (T có làm ví dụ với folder `all_non_negative`)
