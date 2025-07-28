@@ -1,18 +1,31 @@
 *Quan trọng*: Cần setup môi trường theo link này trước: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh
 
-*Quan trọng 2*: Cần có mạng để chạy, vì phase trusted setup nó cần tạo ra powers_of_tau đủ chịu được ràng buộc
-    mà máy thường chạy thì có khi không nổi nên nó sẽ tải file sẵn có trên storage người ta đã làm sẵn về tự động
-    nếu máy offline sẽ tự sinh, mà tự sinh thì để ý kẻo cháy máy
-    những file tải thêm mở thư mục `./compiler/powers_of_tau/` để xem
-        con số sau cùng của tên file (tạm gọi là k) sẽ đại diện cho nó hỗ trợ cho mạch có tối đa 2^k constraints
+*Quan trọng 2*:
+    Cần có mạng để chạy, vì phase trusted setup nó cần tạo ra powers_of_tau đủ chịu được số ràng buộc của mạch
+    Máy thường chạy thì có khi không nổi với mạch lớn nên script sẽ tải file sẵn có trên storage người ta đã làm sẵn về tự động
+    Nếu máy offline script sẽ buộc phải tự sinh powers_of_tau, mà tự sinh thì để ý `Ctrl + C` với `Task Manager` kẻo cháy máy
+    Những file tải thêm mở thư mục `compiler/powers_of_tau/` để xem. Con số sau cùng của tên file (tạm gọi là k) sẽ đại diện cho nó hỗ trợ cho mạch có tối đa 2^k constraints
+    *Những file powers_of_tau cho mạch cực lớn có thể nặng đến 9GB :))) (k = 32 thì phải), nhưng hiện tại các mạch đã demo chỉ mới cần khoảng k = 14 nên download khá nhanh, cần lưu ý phần này.
+    Nếu muốn tải powers_of_tau trước mà không cần script tải thì vào link `https://github.com/iden3/snarkjs#7-prepare-phase-2` tải về và cho vào thư mục `compiler/powers_of_tau/`.
+
+*Quan trọng 3*: Các lệnh chạy dưới đây đều cần chạy ở thư mục gốc dự án, nếu cd lung tung, chạy sẽ bị lỗi
 
 Nếu cần test 1 mạch nào đó:
-    - Trong thư mục `./circuits/` tạo 1 folder tên gì thì tùy (T có làm ví dụ với folder `all_non_negative`)
+    - Trong thư mục `circuits/` tạo 1 folder tên gì thì tùy (T có làm ví dụ với folder `all_non_negative`)
     - Trong folder vừa tạo chứa: 
         - 1 file `gì đó`.circom (Mạch cần test) (Trong ví dụ t đặt tên file cùng tên folder luôn)
         - 1 file `input.json` chứa input cần truyền vào (khác với trên web là comment)
+    -   Chạy lệnh: `node .\complier\ <đường dẫn đến thư mục chứa mạch>`
+            Ví dụ: `node .\complier\ .\circuits\all_non_negative\`
 
-Chạy lệnh: `node .\complier\ <đường dẫn đến thư mục chứa mạch>`
-    Ví dụ: `node .\complier\ .\circuits\all_non_negative\`
+Chạy xong thì trong thư mục chứa mạch sinh ra 1 thư mục output, chứa các file kết quả compile,... nhưng quan trọng gồm:
+    - `proof.json`
+    - `public.json`
+    - `verification_key.json`
+    - 3 file trên sẽ cung cấp cho verifier đi verify (public ra) hay có thể gọi chúng là bằng chứng.
 
-Chạy xong thì trong thư mục chứa mạch sinh ra 1 thư mục output, xem output/public input trong file public.json trong thư mục đó
+Các demo gọi zk-SNARK flow từ chương trình thay vì dùng CLI chạy node:
+    - File `test_zk-snark_flow/success-but-blocking.test.js` là file thử nghiệm import hàm sinh bằng chứng và chạy, cũng là demo cách sinh bằng chứng từ circuit gọi từ chương trình nhưng việc sinh bằng chứng là tác vụ nặng. Nó sẽ gây chặn luồng chính -> Chạy `node .\test_zk-snark_flow\success-but-blocking.test.js` để thử nghiệm.
+    - File `test_zk-snark_flow/success-non-blocking.test.js` cải tiến, sử dụng worker thread để chạy song song tiến trình sinh bằng chứng mà không chặn luồng chính -> Chạy `node .\test_zk-snark_flow\success-non-blocking.test.js` để thử nghiệm.
+
+Merkle tree đang thử nghiệm, nó chưa hoàn chỉnh nhưng khi clone hoặc pull repo về, nên chạy lại `npm i`.

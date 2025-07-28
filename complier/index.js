@@ -430,7 +430,7 @@ function printDebugInfo(outputDir, vkey, pub, proof) {
  * @param {string} inputCircuitDir - Đường dẫn từ user
  * @returns {boolean} - Chạy thành công hay fail, nếu chạy fail sinh bằng chứng thất bại
  */
-function runZKPWorkflow(inputCircuitDir) {
+function runZKSNARKWorkflow(inputCircuitDir) {
 	const startTime = Date.now();
 
 	try {
@@ -483,7 +483,7 @@ function runZKPWorkflow(inputCircuitDir) {
 }
 
 // Export hàm để có thể import từ file khác
-module.exports = { runZKPWorkflow };
+module.exports = { runZKSNARKWorkflow };
 
 // CLI interface
 if (require.main === module) {
@@ -500,6 +500,6 @@ if (require.main === module) {
 	console.log('> [Info] Compiler location:', __dirname);
 	console.log('> [Info] Input path:', inputPath);
 
-	const success = runZKPWorkflow(inputPath);
+	const success = runZKSNARKWorkflow(inputPath);
 	process.exit(success ? 0 : 1);
 }
