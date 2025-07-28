@@ -360,9 +360,9 @@ function setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared) {
 	// Hiển thị thông tin debug
 	printDebugInfo(outputDir, vkey, pub, proof);
 
-	// Bước 6: Verify proof (Sau này cắt bước qua client)
-	console.log('\n\n--> [Info] Step 6: Verifying proof');
-	run(`npx snarkjs groth16 verify ${quote(vkey)} ${quote(pub)} ${quote(proof)}`);
+	// Bước 6: Verify proof (Cắt qua verifier)
+	// console.log('\n\n--> [Info] Step 6: Verifying proof');
+	// run(`npx snarkjs groth16 verify ${quote(vkey)} ${quote(pub)} ${quote(proof)}`);
 
 	// Cleanup intermediate files để tiết kiệm dung lượng
 	console.log('\n\n--> [Info] Cleaning up intermediate files...');
@@ -426,7 +426,7 @@ function printDebugInfo(outputDir, vkey, pub, proof) {
 }
 
 /**
- * Hàm chính để chạy toàn bộ quy trình ZKP
+ * Hàm chính để chạy toàn bộ quy trình
  * @param {string} inputCircuitDir - Đường dẫn từ user
  * @returns {boolean} - Chạy thành công hay fail, nếu chạy fail sinh bằng chứng thất bại
  */

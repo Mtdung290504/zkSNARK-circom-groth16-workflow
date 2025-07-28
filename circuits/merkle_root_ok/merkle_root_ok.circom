@@ -62,4 +62,4 @@ function log_2(x) {
     return r;
 }
 
-component main { public [ timestamp, finalHash ] } = MerkleRootWithTimestamp(4);
+component main { public [ timestamp, finalHash ] } = MerkleRootWithTimestamp(8);

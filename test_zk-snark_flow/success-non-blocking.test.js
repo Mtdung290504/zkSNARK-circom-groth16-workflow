@@ -25,4 +25,4 @@ runZKInWorker('./circuits/prove_PoR').then((result) => {
 	console.log('Kết quả chạy flow:', result);
 });
 
-console.log('Minh chứng 1 + 1:', 1 + 1);
+console.log('Không chặn luồng nữa');

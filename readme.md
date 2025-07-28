@@ -17,16 +17,15 @@ Nếu cần test 1 mạch Circom nào đó:
     - 1 file `input.json` chứa input cần truyền vào (khác với trên web là comment)
 -   Chạy lệnh: `node .\complier\ <đường dẫn đến thư mục chứa mạch>`
         Ví dụ: `node .\complier\ .\circuits\all_non_negative\`
-- *Mạch circom chính nằm trong thư mục `circuits/prove_PoR/`*
-    - Thư mục `circuits/prove_PoR/templates` chứa các mạch khác đã bỏ hàm main và include để cho mạch chính include, sẽ nghĩ cách tự động hóa sau
+- *Mạch circom chính nằm trong thư mục `circuits/prove_PoR/`*. Thư mục `circuits/prove_PoR/templates` chứa các mạch khác đã bỏ hàm main và include để cho mạch chính include.
 
-Chạy xong thì trong thư mục chứa mạch sinh ra 1 thư mục output, chứa các file kết quả compile,... nhưng quan trọng gồm:
+Chạy xong thì trong thư mục chứa mạch sinh ra 1 thư mục `output`, chứa các file kết quả compile,... nhưng quan trọng gồm:
 - `proof.json`
 - `public.json`
 - `verification_key.json`
 - 3 file trên sẽ cung cấp cho verifier đi verify (public ra) hay có thể gọi chúng là bằng chứng.
 
-Các demo gọi zk-SNARK flow từ chương trình thay vì dùng CLI chạy node:
+Các demo gọi zk-SNARK flow từ chương trình thay vì dùng CLI chạy lệnh node như trên:
 - File `test_zk-snark_flow/success-but-blocking.test.js` là file thử nghiệm import hàm sinh bằng chứng và chạy, cũng là demo cách sinh bằng chứng từ circuit gọi từ chương trình nhưng việc sinh bằng chứng là tác vụ nặng. Nó sẽ gây chặn luồng chính -> Chạy `node .\test_zk-snark_flow\success-but-blocking.test.js` để thử nghiệm.
 - File `test_zk-snark_flow/success-non-blocking.test.js` cải tiến, sử dụng worker thread để chạy song song tiến trình sinh bằng chứng mà không chặn luồng chính -> Chạy `node .\test_zk-snark_flow\success-non-blocking.test.js` để thử nghiệm.
 
