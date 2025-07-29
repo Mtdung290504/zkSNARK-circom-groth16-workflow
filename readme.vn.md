@@ -1,4 +1,4 @@
-# Tài liệu ZK-SNARK với Groth16 và Circom
+# Quy trình setup và mô tả công nghệ lõi của dự án
 
 ## Chuẩn bị môi trường
 
@@ -6,7 +6,13 @@
 
 **1. Setup môi trường cơ bản:**
 
-- Làm theo hướng dẫn tại: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh
+- Setup môi trường theo hướng dẫn tại: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh
+  - Lưu ý rằng document trên chỉ viết cho Windows, với Linux hay hệ điều hành khác cần cài đặt các môi trường:
+    - git
+    - circom
+    - nodeJS, npm, npx
+    - zksnark
+  - Script có thể chạy sai trên các hệ điều hành khác nếu những lệnh CLI thao tác với các môi trường trên có sự khác biệt
 - Clone thư viện circomlib vào thư mục gốc dự án:
   ```bash
   git clone https://github.com/iden3/circomlib.git
@@ -26,8 +32,8 @@
 - **Quy tắc đặt tên**: Số k cuối tên file cho biết hỗ trợ tối đa 2^k constraints
 - **Kích thước file**:
   - Mạch cực lớn (k=32): có thể lên đến 9GB
-  - Mạch demo hiện tại (k≈15): download nhanh
-- **Tải trước**: Có thể tải Powers of Tau từ https://github.com/iden3/snarkjs#7-prepare-phase-2 và đặt vào thư mục `compiler/powers_of_tau/`
+  - Mạch demo hiện tại (k≈15): chỉ khoảng 36MB vẫn có thể download nhanh qua script
+- **Tải trước**: Có thể tải Powers of Tau từ https://github.com/iden3/snarkjs#7-prepare-phase-2 và đặt vào thư mục `compiler/powers_of_tau/` nếu lo ngại download bằng script
 
 **3. Thư mục làm việc:**
 
@@ -89,10 +95,11 @@ node .\test_zk-snark_flow\success-non-blocking.test.js
 - Sử dụng worker threads để chạy song song
 - **Ưu điểm**: Không chặn luồng chính
 
-## Verifier độc lập
+## Verifier
 
-- Thư mục `verifier/` có thể tách riêng hoàn toàn khỏi dự án
-- Có thể xem như công cụ bên thứ 3 để verify bằng chứng ZKP từ server
+- Thư mục `verifier/zk-SNARK_verifier/` có thể tách riêng hoàn toàn khỏi dự án
+- Có thể xem như công cụ bên thứ 3 để verify bằng chứng ZKP download từ server
+- Tải lên 3 file trong thư mục `output/` đã đề cập trên để verify
 
 ## Công nghệ ZK-SNARK được sử dụng
 
@@ -111,7 +118,7 @@ Bằng chứng được tạo sử dụng **Groth16** - một trong những ZK-S
 
 **1. Circom (Circuit Compiler)**
 
-- Ngôn ngữ domain-specific để viết arithmetic circuits
+- Ngôn ngữ domain-specific (DSL) để viết arithmetic circuits
 - Compile ra R1CS (Rank-1 Constraint System), WASM, và symbol files
 - Cho phép viết logic phức tạp một cách trực quan
 
