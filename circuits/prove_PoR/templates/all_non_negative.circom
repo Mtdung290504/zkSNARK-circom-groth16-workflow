@@ -38,4 +38,5 @@ template AllNonNegative(n) {
 
     // Output = 1 nếu toàn bộ balance đều >= 0
     allNonNegative <== products[n - 1];
+    allNonNegative === 1;
 }

@@ -360,7 +360,7 @@ function setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared) {
 	// Hiển thị thông tin debug
 	printDebugInfo(outputDir, vkey, pub, proof);
 
-	// Bước 6: Verify proof (Cắt qua verifier)
+	// Bước 6: Verify proof (Cắt qua verifier, chỉ chạy khi dev để đỡ mất thời gian chạy verify riêng)
 	// console.log('\n\n--> [Info] Step 6: Verifying proof');
 	// run(`npx snarkjs groth16 verify ${quote(vkey)} ${quote(pub)} ${quote(proof)}`);
 

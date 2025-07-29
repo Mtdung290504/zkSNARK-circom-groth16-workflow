@@ -1,11 +1,11 @@
-*Quan trọng 1*: Cần setup môi trường theo link này trước: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh và clone circomlib vào thư mục gốc của dự án: `git clone https://github.com/iden3/circomlib.git`
+*Quan trọng 1*: Cần setup môi trường theo link này trước: https://docs.google.com/document/d/1e6rXiNfLfY0tyGLNRCeN4jCv5qX2kDYzorYolOLc7ZY/edit?tab=t.m53yszyif1vt#heading=h.d97jf1b071bh và clone circomlib vào thư mục gốc của dự án: `git clone https://github.com/iden3/circomlib.git` cuối cùng, chạy `npm i` để cài đặt toàn bộ package cần thiết.
 
 *Quan trọng 2*:
 - Rất nên có mạng để chạy, vì phase trusted setup cần tạo ra powers_of_tau đủ cho số ràng buộc của mạch.
 - Máy thường chạy thì có khi không nổi với mạch lớn nên script sẽ tải file sẵn có trên storage người ta đã làm sẵn về tự động
-- Nếu máy offline script sẽ buộc phải tự sinh powers_of_tau, mà tự sinh thì để ý `Ctrl + C` với `Task Manager` kẻo cháy máy
+- Nếu máy offline script sẽ buộc phải tự sinh powers_of_tau, đây là tác vụ có thể từ nhẹ đến không chạy nổi tùy vào số lượng constraints của mạch
 - Những file tải thêm mở thư mục `compiler/powers_of_tau/` để xem. Con số sau cùng của tên file (tạm gọi là k) sẽ đại diện cho nó hỗ trợ cho mạch có tối đa 2^k constraints
-- *Những file powers_of_tau cho mạch cực lớn có thể nặng đến 9GB (với k = 32 thì phải), nhưng hiện tại các mạch đã demo chỉ mới cần - khoảng k = 14 nên download khá nhanh, cần lưu ý phần này.
+- *Những file powers_of_tau cho mạch cực lớn có thể nặng đến 9GB (với k = 32 thì phải), nhưng hiện tại các mạch đã demo chỉ mới cần - khoảng k = 15 nên download khá nhanh, cần lưu ý phần này.
 - Nếu muốn tải powers_of_tau trước mà không để script tự tải thì vào link: https://github.com/iden3/snarkjs#7-prepare-phase-2 tải về và cho vào thư mục `compiler/powers_of_tau/`.
 
 *Quan trọng 3*: Các lệnh chạy dưới đây đều cần chạy ở thư mục gốc dự án, nếu cd lung tung, chạy sẽ bị lỗi.
@@ -29,4 +29,5 @@ Các demo gọi zk-SNARK flow từ chương trình thay vì dùng CLI chạy l�
 - File `test_zk-snark_flow/success-but-blocking.test.js` là file thử nghiệm import hàm sinh bằng chứng và chạy, cũng là demo cách sinh bằng chứng từ circuit gọi từ chương trình nhưng việc sinh bằng chứng là tác vụ nặng. Nó sẽ gây chặn luồng chính -> Chạy `node .\test_zk-snark_flow\success-but-blocking.test.js` để thử nghiệm.
 - File `test_zk-snark_flow/success-non-blocking.test.js` cải tiến, sử dụng worker thread để chạy song song tiến trình sinh bằng chứng mà không chặn luồng chính -> Chạy `node .\test_zk-snark_flow\success-non-blocking.test.js` để thử nghiệm.
 
-Merkle tree đang thử nghiệm, nó chưa hoàn chỉnh nhưng khi clone hoặc pull repo về, nên chạy lại `npm i`.
+*Thư mục `verifier/` có thể tách riêng hoàn toàn khỏi dự án, xem như dùng công cụ bên thứ 3 để verify bằng chứng ZKP download từ server.
+Bằng chứng được tạo sử dụng Groth16...

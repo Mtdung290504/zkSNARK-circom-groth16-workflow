@@ -156,7 +156,7 @@ function displayPublicSignals(container) {
 	const html = `
                 <h4>📊 Public Signals Analysis</h4>
                 <div class="signal-row">
-                    <span>Balance Check:</span>
+                    <span>Check result:</span>
                     <span>${publicSignals[0] === '1' ? '✅ PASS' : '❌ FAIL'}</span>
                 </div>
                 <div class="signal-row">
@@ -165,11 +165,11 @@ function displayPublicSignals(container) {
                 </div>
                 <div class="signal-row">
                     <span>Timestamp:</span>
-                    <span>${publicSignals[2] ? new Date(parseInt(publicSignals[5]) * 1000).toISOString() : 'N/A'}</span>
+                    <span>${publicSignals[2] ? new Date(parseInt(publicSignals[2]) * 1000).toUTCString() : 'N/A'}</span>
                 </div>
                 <div class="signal-row">
                     <span>Final Hash:</span>
-                    <span>${publicSignals[3] ? publicSignals[6].substring(0, 20) + '...' : 'N/A'}</span>
+                    <span>${publicSignals[3] ? publicSignals[3].substring(0, 20) + '...' : 'N/A'}</span>
                 </div>
             `;
 
