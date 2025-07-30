@@ -10,6 +10,19 @@ const data = JSON.parse(rawData);
 	const poseidon = await circomlibjs.buildPoseidon();
 	const F = poseidon.F;
 
+	// Step 0: Verify leafHash = Poseidon(uid, balance)
+	const uidBigInt = BigInt(data.uid);
+	const balanceBigInt = BigInt(data.balance);
+
+	const computedLeafHash = F.toString(poseidon([uidBigInt, balanceBigInt]));
+	const expectedLeafHash = BigInt(data.leafHash).toString();
+
+	if (computedLeafHash !== expectedLeafHash) {
+		throw new Error(`Leaf hash mismatch!\nExpected: ${expectedLeafHash}\nGot     : ${computedLeafHash}`);
+	} else {
+		console.log('Leaf hash is valid (uid + balance).');
+	}
+
 	// Step 1: Verify Merkle Proof
 	let hash = BigInt(data.leafHash);
 

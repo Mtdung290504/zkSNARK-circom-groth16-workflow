@@ -165,7 +165,7 @@ function displayPublicSignals(container) {
                 </div>
                 <div class="signal-row">
                     <span>Timestamp:</span>
-                    <span>${publicSignals[2] ? new Date(parseInt(publicSignals[2]) * 1000).toUTCString() : 'N/A'}</span>
+                    <span>${publicSignals[2] ? formatTimestamp(parseInt(publicSignals[2])) : 'N/A'}</span>
                 </div>
                 <div class="signal-row">
                     <span>Final Hash:</span>
@@ -174,4 +174,18 @@ function displayPublicSignals(container) {
             `;
 
 	container.innerHTML = html;
+}
+
+function formatTimestamp(timestamp) {
+	const date = new Date(timestamp);
+
+	const dd = String(date.getDate()).padStart(2, '0');
+	const mm = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+	const yyyy = date.getFullYear();
+
+	const hh = String(date.getHours()).padStart(2, '0');
+	const min = String(date.getMinutes()).padStart(2, '0');
+	const ss = String(date.getSeconds()).padStart(2, '0');
+
+	return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
 }
