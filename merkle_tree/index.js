@@ -177,7 +177,7 @@ async function buildMerkleTree(input) {
 
 	return {
 		finalHash: tree.finalRoot,
-		timestamp: tree.timestamp,
+		timestamp: tree.timestamp.toString(),
 	};
 }
 

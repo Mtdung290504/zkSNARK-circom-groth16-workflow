@@ -153,3 +153,8 @@ Bằng chứng được tạo sử dụng **Groth16** - một trong những ZK-S
 - Biểu diễn circuit dưới dạng hệ phương trình dạng A⊙B = C
 - Mỗi constraint đại diện một phép toán cơ bản
 - Witness chứa tất cả intermediate values thỏa mãn constraints
+
+*Đã hoàn thành phần cốt lõi nhất của dự án, từ các user trong database, render thành merkle tree, mạch circom và input cho việc sinh bằng chứng. Chi tiết hãy thử:*
+- Thay đổi balance hoặc số lượng user trong `database/storages/users.json`
+- Chạy lệnh `node .\gen_proof\`
+- Bằng chứng sẽ được sinh tại thư mục `output` của mạch chính `ProvePoR` đã đề cập ở trên.
