@@ -2,13 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Trả về số lũy thừa của 2 gần nhất ≥ n
+ * Trả về số lũy thừa của 2 gần nhất ≥ n, tối thiểu là 2
  * @param {number} n
  * @returns {number}
  */
 function nearestPowerOfTwo(n) {
 	if (n <= 0) throw new Error('Count must be positive');
-	return 1 << Math.ceil(Math.log2(n));
+	return Math.max(2, 1 << Math.ceil(Math.log2(n)));
 }
 
 /**

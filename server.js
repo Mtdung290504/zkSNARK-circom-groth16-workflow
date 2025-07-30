@@ -5,7 +5,8 @@ const cors = require('cors');
 const session = require('express-session');
 const DepositProcessor = require('./BE/services/depositProcessor');
 const { getAllUsersForProof, genProof } = require('./gen_proof');
-const { buildMerkleTree } = require('./merkle_tree');
+const { buildMerkleTree, getTreeInfo } = require('./merkle_tree');
+const { getMerkleProof } = require('./merkle_tree');
 
 // Middleware
 app.use(express.json());
@@ -13,11 +14,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
 	cors({
-		origin: '*',
+		origin: 'http://localhost:3000',
 		credentials: true,
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
 	})
 );
-
 app.use(
 	session({
 		secret: 'zkp-secret',
@@ -39,6 +41,38 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/', routes);
 
+app.get('/proof-metadata', (_req, res) => {
+	try {
+		const proofMetadata = getTreeInfo();
+		if (!proofMetadata) throw new Error();
+		const { finalHash, leaves, timestamp } = proofMetadata;
+		res.json({
+			timestamp,
+			expectedDebtSum: leaves.reduce((sum, [_uid, balance]) => sum + balance, 0),
+			finalHash,
+		});
+	} catch (error) {
+		res.json({ message: 'Bằng chứng đang được tạo, hãy kiểm tra lại sau' });
+	}
+});
+
+const path = require('path');
+const fs = require('fs');
+app.get('/zk-proof/:name', (req, res) => {
+	const filename = req.params.name;
+	const filePath = path.join(__dirname, 'circuits', 'prove_PoR', 'output', filename);
+
+	if (!fs.existsSync(filePath)) {
+		return res.json({ message: 'Bằng chứng đang được tạo, hãy kiểm tra lại sau' });
+	}
+
+	res.download(filePath, filename, (err) => {
+		if (err) {
+			console.error('Download error:', err);
+			res.status(500).json({ message: 'Lỗi khi tải file', error: err.message });
+		}
+	});
+});
 // Error handling
 app.use((err, req, res, next) => {
 	console.error(err.stack);
@@ -46,7 +80,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}`);
 

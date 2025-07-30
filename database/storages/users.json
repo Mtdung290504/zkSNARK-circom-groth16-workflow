@@ -1,40 +1,23 @@
 [
   {
     "uid": 1,
-    "username": "hieu",
-    "email": "hieu@example.com",
-    "password": "123456",
-    "walletAddress": "0x1234567890abcdef1234567890abcdef12345678",
-    "balance": 1191
+    "username": "testsan123",
+    "password": "testsan123",
+    "walletAddress": "0da9480d633b5ac46ae6252c2b2c60c86fecb18504d5e545d95cc88ea08b35c4",
+    "balance": 300
   },
   {
     "uid": 2,
-    "username": "toan",
-    "email": "toan@example.com",
+    "username": "thangngoo",
     "password": "123456",
-    "walletAddress": "0xabcdef1234567890abcdef1234567890abcdef12",
-    "balance": 2609
-  },
-  {
-    "uid": 3,
-    "username": "hoang",
-    "password": "123456",
-    "email": "hoang@gmail.com",
-    "walletAddress": "31231231313",
-    "balance": 50
-  },
-  {
-    "uid": 4,
-    "username": "hien",
-    "password": "123456",
-    "walletAddress": "3123123131314243432",
+    "walletAddress": "1cf62965e5613cd404f589bbe2e214de8b504177c655e9533c41d24e86fae1d3",
     "balance": 0
   },
   {
-    "uid": 5,
-    "username": "khanh112",
+    "uid": 3,
+    "username": "thanhngoo",
     "password": "123456",
-    "walletAddress": "3123123131314243432",
+    "walletAddress": "dcec9636089715499921bddb34af8aeec2526ad8827afbe60323a663ff86d301",
     "balance": 0
   }
 ]

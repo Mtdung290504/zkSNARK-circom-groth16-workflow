@@ -1,103 +1,107 @@
-const db = require("../../database");
-const fetch = require("node-fetch");
+const db = require('../../database');
+const fetch = require('node-fetch');
 
 class DepositProcessor {
-  constructor() {
-    this.isRunning = false;
-    this.interval = null;
-  }
+	constructor() {
+		this.isRunning = false;
+		this.interval = null;
+	}
 
-  async processDeposits() {
-    try {
-      const config = await db.readData("config.json");
-      const blockchainApiUrl = config.blockchainApiUrl;
+	async processDeposits() {
+		try {
+			const config = await db.readData('config.json');
+			const blockchainApiUrl = config.blockchainApiUrl;
 
-      // Fetch blockchain transactions
-      const response = await fetch(blockchainApiUrl);
-      if (!response.ok) {
-        console.error("Failed to fetch blockchain data");
-        return;
-      }
+			// Fetch blockchain transactions
+			const response = await fetch(blockchainApiUrl);
+			if (!response.ok) {
+				console.error('Failed to fetch blockchain data');
+				return;
+			}
 
-      const blockchainTransactions = await response.json();
+			const blockchainTransactions = await response.json();
 
-      // Sort transactions by timestamp (oldest to newest)
-      blockchainTransactions.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      );
+			// Sort transactions by timestamp (oldest to newest)
+			blockchainTransactions.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-      const newestDepositID = await db.getNewestDepositID();
+			const newestDepositID = await db.getNewestDepositID();
 
-      let processedCount = 0;
-      let lastProcessedID = newestDepositID;
+			let processedCount = 0;
+			let lastProcessedID = newestDepositID;
+			let newest_prs = blockchainTransactions.find(({ _id }) => _id === newestDepositID);
+			let newestindex = blockchainTransactions.indexOf(newest_prs);
 
-      for (const tx of blockchainTransactions) {
-        // Skip if we've already processed this transaction
-        if (newestDepositID && tx._id === newestDepositID) {
-          break;
-        }
+			const w_transactions = blockchainTransactions.slice(newestindex + 1);
+			console.log('newestindex', newestindex);
+			console.log('w_transactions', w_transactions);
 
-        // Check if this is a deposit to our exchange wallet
-        if (tx.to === config.exchangeWalletAddress) {
-          // Find user by wallet address
-          const uid = await db.getUIDbyWalletAddress(tx.from);
+			for (const tx of w_transactions) {
+				// Skip if we've already processed this transaction
+				if (newestDepositID && tx._id === newestDepositID) {
+					break;
+				}
 
-          if (uid) {
-            // Process deposit
-            await db.deposit(uid, tx.amount);
-            processedCount++;
-            console.log(`Processed deposit: ${tx.amount} to user ${uid}`);
-          }
-        }
+				// Check if this is a deposit to our exchange wallet
+				if (tx.to === config.exchangeWalletAddress) {
+					// Find user by wallet address
+					const uid = await db.getUIDbyWalletAddress(tx.from);
 
-        lastProcessedID = tx._id;
-      }
+					if (uid) {
+						// Process deposit
+						await db.deposit(uid, tx.amount);
+						processedCount++;
+						console.log(`Processed deposit: ${tx.amount} to user ${uid}`);
+					}
+				}
 
-      // Update newest deposit ID
-      if (lastProcessedID !== newestDepositID) {
-        await db.setNewestDepositID(lastProcessedID);
-      }
+				lastProcessedID = tx._id;
+			}
 
-      if (processedCount > 0) {
-        console.log(`Processed ${processedCount} new deposits`);
-      }
-    } catch (error) {
-      console.error("Error processing deposits:", error);
-    }
-  }
+			// Update newest deposit ID
+			if (lastProcessedID !== newestDepositID) {
+				await db.setNewestDepositID(lastProcessedID);
+			}
 
-  start() {
-    if (this.isRunning) {
-      console.log("Deposit processor is already running");
-      return;
-    }
+			if (processedCount > 0) {
+				console.log(`Processed ${processedCount} new deposits`);
+			}
+		} catch (error) {
+			console.error('Error processing deposits:', error);
+		}
+	}
 
-    console.log("Starting deposit processor...");
-    this.isRunning = true;
+	start() {
+		if (this.isRunning) {
+			console.log('Deposit processor is already running');
+			return;
+		}
 
-    // Process immediately
-    this.processDeposits();
+		console.log('Starting deposit processor...');
+		this.isRunning = true;
 
-    // Then process every 3 seconds
-    this.interval = setInterval(() => {
-      this.processDeposits();
-    }, 3000);
-  }
+		// Process immediately
+		this.processDeposits();
 
-  stop() {
-    if (!this.isRunning) {
-      console.log("Deposit processor is not running");
-      return;
-    }
+		// Then process every 3 seconds
+		this.interval = setInterval(() => {
+			this.processDeposits();
+		}, 3000);
+	}
 
-    console.log("Stopping deposit processor...");
-    this.isRunning = false;
+	stop() {
+		if (!this.isRunning) {
+			console.log('Deposit processor is not running');
+			return;
+		}
 
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-  }
+		console.log('Stopping deposit processor...');
+		this.isRunning = false;
+
+		if (this.interval) {
+			clearInterval(this.interval);
+			this.interval = null;
+		}
+	}
 }
 
 module.exports = DepositProcessor;

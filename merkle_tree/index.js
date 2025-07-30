@@ -202,7 +202,7 @@ async function getMerkleProof(uid, treeDataPath = null) {
 }
 
 // Hàm đọc timestamp từ file JSON tree đã lưu
-function getTreeCurrentTimeStamp(treeDataPath = null) {
+function getTreeInfo(treeDataPath = null) {
 	try {
 		let filePath;
 		if (treeDataPath) {
@@ -213,9 +213,11 @@ function getTreeCurrentTimeStamp(treeDataPath = null) {
 
 		const treeData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 		const timestamp = treeData.timestamp;
+		const leaves = treeData.leaves;
+		const finalHash = treeData.finalRoot;
 
-		console.log(`Tree timestamp from ${filePath}: ${timestamp}`);
-		return timestamp;
+		console.log(`Tree info from ${filePath}: Timestamp:${timestamp}; FinalHash: ${finalHash}; Leaves:`, leaves);
+		return { timestamp, finalHash, leaves };
 	} catch (error) {
 		console.error('Error reading tree timestamp:', error.message);
 		return null;
@@ -240,7 +242,7 @@ function uidToFieldElement(uid) {
 module.exports = {
 	buildMerkleTree,
 	getMerkleProof,
-	getTreeCurrentTimeStamp,
+	getTreeInfo,
 	CircomCompatibleMerkleTree,
 	uidToFieldElement,
 };
