@@ -2,24 +2,36 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Renders the ProvePoR circuit with a dynamic count parameter
- * @param {number} count - The number of users/entries for the circuit
+ * Trả về số lũy thừa của 2 gần nhất ≥ n
+ * @param {number} n
+ * @returns {number}
+ */
+function nearestPowerOfTwo(n) {
+	if (n <= 0) throw new Error('Count must be positive');
+	return 1 << Math.ceil(Math.log2(n));
+}
+
+/**
+ * Cập nhật file Circom với count và nearestPo2
+ * @param {number} count - Số lượng thực tế (actual size)
  */
 function renderPoRcircuitCount(count) {
 	try {
+		const nearestPo2 = nearestPowerOfTwo(count);
+
 		// Tìm đường dẫn tuyệt đối đến file circom
 		const circuitPath = path.resolve(__dirname, '../circuits/prove_PoR/prove_PoR.circom');
 
 		// Đọc nội dung file
 		const content = fs.readFileSync(circuitPath, 'utf8');
 
-		// Thay thế parameter bằng regex
-		const updatedContent = content.replace(/ProvePoR\(\d+\)/g, `ProvePoR(${count})`);
+		// Thay thế các tham số trong ProvePoR(...) template
+		const updatedContent = content.replace(/ProvePoR\(\s*\d+\s*,\s*\d+\s*\)/g, `ProvePoR(${count}, ${nearestPo2})`);
 
 		// Ghi lại file
 		fs.writeFileSync(circuitPath, updatedContent);
 
-		console.log(`Updated ProvePoR parameter to ${count}`);
+		console.log(`Updated ProvePoR(count=${count}, nearestPo2=${nearestPo2})`);
 	} catch (error) {
 		console.error('Error updating circuit:', error.message);
 	}

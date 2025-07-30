@@ -9,7 +9,7 @@ include "./templates/all_non_negative.circom";
 include "./templates/merkle_root_ok.circom";
 include "./templates/sum_ok.circom";
 
-template ProvePoR(n, nearestPo2) {
+template ProvePoR(n) {
     signal input users[n][2];
     signal input expectedSum;
     signal input timestamp;
@@ -37,7 +37,7 @@ template ProvePoR(n, nearestPo2) {
     sumCheck <== sumBalances.isCorrect;
     
     // Circuit 3: Check the final hash from the merkle root and the time stamp is correctly generated
-    component merkleRoot = MerkleRootWithTimestamp(n, nearestPo2);
+    component merkleRoot = MerkleRootWithTimestamp(n);
     for (var i = 0; i < n; i++) {
         merkleRoot.data[i][0] <== users[i][0];
         merkleRoot.data[i][1] <== users[i][1];
@@ -58,4 +58,4 @@ template ProvePoR(n, nearestPo2) {
     log("All checks pass:", allChecksPass);
 }
 
-component main { public [ expectedSum, timestamp, finalHash ] } = ProvePoR(4, 4);
+component main { public [ expectedSum, timestamp, finalHash ] } = ProvePoR(4);
