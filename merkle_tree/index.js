@@ -202,7 +202,7 @@ async function getMerkleProof(uid, treeDataPath = null) {
 }
 
 // Hàm đọc timestamp từ file JSON tree đã lưu
-function getTreeCurrentTimeStamp(treeDataPath = null) {
+function getTreeInfo(treeDataPath = null) {
 	try {
 		let filePath;
 		if (treeDataPath) {
@@ -213,9 +213,11 @@ function getTreeCurrentTimeStamp(treeDataPath = null) {
 
 		const treeData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 		const timestamp = treeData.timestamp;
+		const leaves = treeData.leaves;
+		const finalHash = treeData.finalRoot;
 
-		console.log(`Tree timestamp from ${filePath}: ${timestamp}`);
-		return timestamp;
+		console.log(`Tree info from ${filePath}: Timestamp:${timestamp}; FinalHash: ${finalHash}; Leaves:`, leaves);
+		return { timestamp, finalHash, leaves };
 	} catch (error) {
 		console.error('Error reading tree timestamp:', error.message);
 		return null;
@@ -240,35 +242,36 @@ function uidToFieldElement(uid) {
 module.exports = {
 	buildMerkleTree,
 	getMerkleProof,
-	getTreeCurrentTimeStamp,
+	getTreeInfo,
 	CircomCompatibleMerkleTree,
 	uidToFieldElement,
 };
 
 // Ví dụ sử dụng
 if (require.main === module) {
-	(async () => {
-		// Test data với number UIDs
-		const input = [
-			[101, 1000],
-			[102, 2500],
-			[103, 1500],
-			[104, 3000],
-		];
+	console.log(getTreeInfo());
+	// (async () => {
+	// 	// Test data với number UIDs
+	// 	const input = [
+	// 		[101, 1000],
+	// 		[102, 2500],
+	// 		[103, 1500],
+	// 		[104, 3000],
+	// 	];
 
-		// Build tree
-		console.log('Building Poseidon Merkle Tree...');
-		const result = await buildMerkleTree(input);
-		console.log('Build result:', result);
-		console.log('Final hash:', result.finalHash);
-		console.log('Timestamp:', result.timestamp);
+	// 	// Build tree
+	// 	console.log('Building Poseidon Merkle Tree...');
+	// 	const result = await buildMerkleTree(input);
+	// 	console.log('Build result:', result);
+	// 	console.log('Final hash:', result.finalHash);
+	// 	console.log('Timestamp:', result.timestamp);
 
-		// Get timestamp từ file
-		console.log('\nGetting timestamp from saved tree...');
-		const savedTimestamp = getTreeCurrentTimeStamp();
+	// 	// Get timestamp từ file
+	// 	console.log('\nGetting timestamp from saved tree...');
+	// 	const savedTimestamp = getTreeInfo();
 
-		// Get proof cho UID 103
-		console.log('\nGetting proof for UID 103...');
-		const proof = await getMerkleProof(103);
-	})();
+	// 	// Get proof cho UID 103
+	// 	console.log('\nGetting proof for UID 103...');
+	// 	const proof = await getMerkleProof(103);
+	// })();
 }

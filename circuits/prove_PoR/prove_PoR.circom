@@ -46,10 +46,11 @@ template ProvePoR(n, nearestPo2) {
     merkleRoot.finalHash <== finalHash;
     merkleCheck <== 1;
     
-    // Tong hop ket qua - tat ca phai pass
+    // Summary of results - all must pass
     signal temp1;
     temp1 <== nonNegativeCheck * sumCheck;
     allChecksPass <== temp1 * merkleCheck;
+    allChecksPass === 1;
     
     log("=== MAIN CIRCUIT RESULTS ===");
     log("Non-negative check:", nonNegativeCheck);

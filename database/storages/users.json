@@ -2,7 +2,6 @@
   {
     "uid": 1,
     "username": "hieu",
-    "email": "hieu@example.com",
     "password": "123456",
     "walletAddress": "0x1234567890abcdef1234567890abcdef12345678",
     "balance": 1191

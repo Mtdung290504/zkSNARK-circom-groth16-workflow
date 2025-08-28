@@ -340,6 +340,8 @@ function setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared) {
 	// Bước 3: Xuất verification key
 	console.log('\n\n--> [Info] Step 3: Exporting verification key');
 	run(`npx snarkjs zkey export verificationkey ${quote(zkeyFinal)} ${quote(vkey)}`);
+	// Nếu muốn không đóng góp
+	// run(`npx snarkjs zkey export verificationkey ${quote(zkey0)} ${quote(vkey)}`);
 
 	// Bước 4: Tạo witness từ input
 	console.log('\n\n--> [Info] Step 4: Generating witness from input');
@@ -356,6 +358,8 @@ function setupAndProve(circuitDir, outputDir, circuitName, ptauPrepared) {
 	// Bước 5: Tạo proof từ witness
 	console.log('\n\n--> [Info] Step 5: Generating zero-knowledge proof');
 	run(`npx snarkjs groth16 prove ${quote(zkeyFinal)} ${quote(witness)} ${quote(proof)} ${quote(pub)}`);
+	// Khi không đóng góp vào Zkey
+	// run(`npx snarkjs groth16 prove ${quote(zkey0)} ${quote(witness)} ${quote(proof)} ${quote(pub)}`);
 
 	// Hiển thị thông tin debug
 	printDebugInfo(outputDir, vkey, pub, proof);

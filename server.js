@@ -5,7 +5,7 @@ const cors = require('cors');
 const session = require('express-session');
 const DepositProcessor = require('./BE/services/depositProcessor');
 const { getAllUsersForProof, genProof } = require('./gen_proof');
-const { buildMerkleTree } = require('./merkle_tree');
+const { buildMerkleTree, getTreeInfo } = require('./merkle_tree');
 
 // Middleware
 app.use(express.json());
@@ -39,6 +39,39 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/', routes);
 
+app.get('/proof-metadata', (_req, res) => {
+	try {
+		const proofMetadata = getTreeInfo();
+		if (!proofMetadata) throw new Error();
+		const { finalHash, leaves, timestamp } = proofMetadata;
+		res.json({
+			timestamp,
+			expectedDebtSum: leaves.reduce((sum, [_uid, balance]) => sum + balance, 0),
+			finalHash,
+		});
+	} catch (error) {
+		res.json({ message: 'Bằng chứng đang được tạo, hãy kiểm tra lại sau' });
+	}
+});
+
+const path = require('path');
+const fs = require('fs');
+app.get('/zk-proof/:name', (req, res) => {
+	const filename = req.params.name;
+	const filePath = path.join(__dirname, 'circuits', 'prove_PoR', 'output', filename);
+
+	if (!fs.existsSync(filePath)) {
+		return res.json({ message: 'Bằng chứng đang được tạo, hãy kiểm tra lại sau' });
+	}
+
+	res.download(filePath, filename, (err) => {
+		if (err) {
+			console.error('Download error:', err);
+			res.status(500).json({ message: 'Lỗi khi tải file', error: err.message });
+		}
+	});
+});
+
 // Error handling
 app.use((err, req, res, next) => {
 	console.error(err.stack);
@@ -54,10 +87,10 @@ app.listen(PORT, () => {
 	const depositProcessor = new DepositProcessor();
 	depositProcessor.start();
 
-	// Interval sinh bằng chứng, trong ngữ cảnh demo, chỉ dùng setTimeout
+	// Interval sinh bằng chứng
 	// Trong thực tế triển khai thì có thể quy định thêm ngưỡng giao dịch để cập nhật (Cứ mỗi 100 giao dịch thì cập nhật)
 	// Tối ưu interval, nếu check trong khoảng vừa rồi không có giao dịch thì không sinh bằng chứng
-	setTimeout(async () => {
+	setInterval(async () => {
 		getAllUsersForProof()
 			.then((users) => {
 				buildMerkleTree(users).then((result) => {
@@ -66,5 +99,5 @@ app.listen(PORT, () => {
 				});
 			})
 			.catch((e) => console.log(e));
-	}, 2000);
+	}, 1000 * 60 * 60 * 6);
 });
