@@ -249,28 +249,29 @@ module.exports = {
 
 // Ví dụ sử dụng
 if (require.main === module) {
-	(async () => {
-		// Test data với number UIDs
-		const input = [
-			[101, 1000],
-			[102, 2500],
-			[103, 1500],
-			[104, 3000],
-		];
+	console.log(getTreeInfo());
+	// (async () => {
+	// 	// Test data với number UIDs
+	// 	const input = [
+	// 		[101, 1000],
+	// 		[102, 2500],
+	// 		[103, 1500],
+	// 		[104, 3000],
+	// 	];
 
-		// Build tree
-		console.log('Building Poseidon Merkle Tree...');
-		const result = await buildMerkleTree(input);
-		console.log('Build result:', result);
-		console.log('Final hash:', result.finalHash);
-		console.log('Timestamp:', result.timestamp);
+	// 	// Build tree
+	// 	console.log('Building Poseidon Merkle Tree...');
+	// 	const result = await buildMerkleTree(input);
+	// 	console.log('Build result:', result);
+	// 	console.log('Final hash:', result.finalHash);
+	// 	console.log('Timestamp:', result.timestamp);
 
-		// Get timestamp từ file
-		console.log('\nGetting timestamp from saved tree...');
-		const savedTimestamp = getTreeCurrentTimeStamp();
+	// 	// Get timestamp từ file
+	// 	console.log('\nGetting timestamp from saved tree...');
+	// 	const savedTimestamp = getTreeInfo();
 
-		// Get proof cho UID 103
-		console.log('\nGetting proof for UID 103...');
-		const proof = await getMerkleProof(103);
-	})();
+	// 	// Get proof cho UID 103
+	// 	console.log('\nGetting proof for UID 103...');
+	// 	const proof = await getMerkleProof(103);
+	// })();
 }

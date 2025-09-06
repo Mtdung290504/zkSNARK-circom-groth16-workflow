@@ -6,7 +6,6 @@ const session = require('express-session');
 const DepositProcessor = require('./BE/services/depositProcessor');
 const { getAllUsersForProof, genProof } = require('./gen_proof');
 const { buildMerkleTree, getTreeInfo } = require('./merkle_tree');
-const { getMerkleProof } = require('./merkle_tree');
 
 // Middleware
 app.use(express.json());
@@ -73,6 +72,7 @@ app.get('/zk-proof/:name', (req, res) => {
 		}
 	});
 });
+
 // Error handling
 app.use((err, req, res, next) => {
 	console.error(err.stack);
@@ -88,10 +88,10 @@ app.listen(PORT, () => {
 	const depositProcessor = new DepositProcessor();
 	depositProcessor.start();
 
-	// Interval sinh bằng chứng, trong ngữ cảnh demo, chỉ dùng setTimeout
+	// Interval sinh bằng chứng
 	// Trong thực tế triển khai thì có thể quy định thêm ngưỡng giao dịch để cập nhật (Cứ mỗi 100 giao dịch thì cập nhật)
 	// Tối ưu interval, nếu check trong khoảng vừa rồi không có giao dịch thì không sinh bằng chứng
-	setTimeout(async () => {
+	setInterval(async () => {
 		getAllUsersForProof()
 			.then((users) => {
 				buildMerkleTree(users).then((result) => {
@@ -100,5 +100,5 @@ app.listen(PORT, () => {
 				});
 			})
 			.catch((e) => console.log(e));
-	}, 2000);
+	}, 1000 * 60 * 60 * 6);
 });
