@@ -1,5 +1,6 @@
 powers_of_tau/
 output/
+tmp/
 circomlib/
 node_modules/
 .DS_Store
