@@ -18,11 +18,9 @@ router.get('/', requireLogin, async (req, res) => {
 router.post('/', requireLogin, async (req, res) => {
 	try {
 		const { toUID, amount } = req.body;
-
 		if (toUID === req.session.UID) return res.status(400).json({ error: 'Cannot transfer money to myself' });
-
 		if (!toUID || !amount) {
-			return res.status(400).json({ error: 'Target UID and amount are required' });
+			return res.status(400).json({ error: 'toUID and amount are required' });
 		}
 
 		if (amount <= 0) {

@@ -91,8 +91,8 @@ async function getTransactionHistory(uid) {
 	return transactions
 		.filter((t) => t.from_uid === uid || t.to_uid === uid)
 		.map((t) => {
-			const fromUser = users.find((u) => u.id === t.from_uid);
-			const toUser = users.find((u) => u.id === t.to_uid);
+			const fromUser = users.find((u) => u.uid === t.from_uid);
+			const toUser = users.find((u) => u.uid === t.to_uid);
 			return {
 				username: t.from_uid === uid ? toUser?.username || 'Unknown' : fromUser?.username || 'Unknown',
 				amount: t.from_uid === uid ? -t.amount : t.amount,

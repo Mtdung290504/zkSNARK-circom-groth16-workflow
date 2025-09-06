@@ -10,7 +10,6 @@ router.use('/auth', authRoutes);
 router.use('/transactions', transactionRoutes);
 router.use('/deposits', depositRoutes);
 router.use('/withdraws', withdrawRoutes);
-
 router.get('/merkle-proof', async (req, res) => {
 	const UID = req.session.UID;
 	if (!UID) {

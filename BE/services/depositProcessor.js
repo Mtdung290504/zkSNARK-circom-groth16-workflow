@@ -20,20 +20,24 @@ class DepositProcessor {
 			}
 
 			const blockchainTransactions = await response.json();
-			console.log('BLockchain transactions:', blockchainTransactions);
 
 			// Sort transactions by timestamp (oldest to newest)
 			blockchainTransactions.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
 			const newestDepositID = await db.getNewestDepositID();
-			console.log('newestDepositID: ', newestDepositID);
 
 			let processedCount = 0;
 			let lastProcessedID = newestDepositID;
+			let newest_prs = blockchainTransactions.find(({ _id }) => _id === newestDepositID);
+			let newestindex = blockchainTransactions.indexOf(newest_prs);
 
-			for (const tx of blockchainTransactions) {
+			const w_transactions = blockchainTransactions.slice(newestindex + 1);
+			console.log('newestindex', newestindex);
+			console.log('w_transactions', w_transactions);
+
+			for (const tx of w_transactions) {
 				// Skip if we've already processed this transaction
 				if (newestDepositID && tx._id === newestDepositID) {
-					console.log(`Ignore transaction: ${tx._id}`);
 					break;
 				}
 
