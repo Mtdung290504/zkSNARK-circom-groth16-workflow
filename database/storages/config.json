@@ -1,5 +1,5 @@
 {
-	"exchangeWalletAddress": "686cd78ceabb453001dc499b2e2bfd5a6ff48da6d776480a543a7bf0432611bc",
-	"newestDepositID": "6889ffc3e1b70f7e2e7a6258",
-	"blockchainApiUrl": "https://miniblockchain.vercel.app/api/transaction/686cd78ceabb453001dc499b2e2bfd5a6ff48da6d776480a543a7bf0432611bc"
+  "exchangeWalletAddress": "a1e0e415d72c8458c4c2342e1be979aee2c9ea40f295a6d0ca6be7950a92d212",
+  "newestDepositID": null,
+  "blockchainApiUrl": "http://localhost:8080/api/transaction/a1e0e415d72c8458c4c2342e1be979aee2c9ea40f295a6d0ca6be7950a92d212"
 }

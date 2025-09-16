@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
 	cors({
-		origin: 'http://localhost:3000',
+		origin: 'http://localhost:8081',
 		credentials: true,
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
@@ -86,7 +86,7 @@ app.listen(PORT, () => {
 
 	// Start deposit processor
 	const depositProcessor = new DepositProcessor();
-	depositProcessor.start();
+	// depositProcessor.start();
 
 	// Interval sinh bằng chứng
 	// Trong thực tế triển khai thì có thể quy định thêm ngưỡng giao dịch để cập nhật (Cứ mỗi 100 giao dịch thì cập nhật)

@@ -1,6 +1,7 @@
 const { buildPoseidon } = require('circomlibjs');
 const fs = require('fs');
 const path = require('path');
+const { nearestPowerOfTwo } = require('../circuit_renderer');
 
 class CircomCompatibleMerkleTree {
 	constructor(leaves) {
@@ -44,7 +45,8 @@ class CircomCompatibleMerkleTree {
 	// Build tree theo style của Circom - pad đến power of 2 ngay từ đầu
 	async buildTreeCircomStyle() {
 		// Tìm nearest power of 2
-		const nearestPo2 = this.getNearestPowerOf2(this.leaves.length);
+		// const nearestPo2 = this.getNearestPowerOf2(this.leaves.length);
+		const nearestPo2 = nearestPowerOfTwo(this.leaves.length);
 
 		// Pad data đến power of 2 ngay từ đầu
 		const paddedLeaves = [...this.leaves];

@@ -63,7 +63,7 @@ function renderPoRinput(users, expectedSum, timestamp, finalHash) {
 	}
 }
 
-module.exports = { renderPoRcircuitCount, renderPoRinput };
+module.exports = { renderPoRcircuitCount, renderPoRinput, nearestPowerOfTwo };
 
 /*
 Usages:

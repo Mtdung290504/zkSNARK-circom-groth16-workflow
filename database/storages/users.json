@@ -1,23 +1,9 @@
 [
   {
     "uid": 1,
-    "username": "testsan123",
-    "password": "testsan123",
-    "walletAddress": "0da9480d633b5ac46ae6252c2b2c60c86fecb18504d5e545d95cc88ea08b35c4",
-    "balance": 300
-  },
-  {
-    "uid": 2,
-    "username": "thangngoo",
+    "username": "mtd",
     "password": "123456",
-    "walletAddress": "1cf62965e5613cd404f589bbe2e214de8b504177c655e9533c41d24e86fae1d3",
-    "balance": 0
-  },
-  {
-    "uid": 3,
-    "username": "thanhngoo",
-    "password": "123456",
-    "walletAddress": "dcec9636089715499921bddb34af8aeec2526ad8827afbe60323a663ff86d301",
+    "walletAddress": "253bd077aca8330662899a4e3753a5577e34ecd64183e03fe3a05e411242c1c4",
     "balance": 0
   }
 ]
