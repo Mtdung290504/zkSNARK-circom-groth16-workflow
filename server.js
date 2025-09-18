@@ -39,7 +39,6 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/', routes);
-
 app.get('/proof-metadata', (_req, res) => {
 	try {
 		const proofMetadata = getTreeInfo();

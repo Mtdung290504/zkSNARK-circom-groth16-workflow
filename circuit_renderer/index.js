@@ -12,8 +12,8 @@ function nearestPowerOfTwo(n) {
 }
 
 /**
- * Cập nhật file Circom với count và nearestPo2
- * @param {number} count - Số lượng thực tế (actual size)
+ * Cập nhật mạch Circom với count và nearestPo2 phù hợp với lượng user
+ * @param {number} count - Số lượng user thực tế (actual size)
  */
 function renderPoRcircuitCount(count) {
 	try {

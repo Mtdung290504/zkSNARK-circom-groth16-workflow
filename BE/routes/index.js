@@ -10,6 +10,8 @@ router.use('/auth', authRoutes);
 router.use('/transactions', transactionRoutes);
 router.use('/deposits', depositRoutes);
 router.use('/withdraws', withdrawRoutes);
+
+// Merkle proof phải ở đây (sau auth), vì chỉ người dùng trong sàn mới có, người ngoài thì k
 router.get('/merkle-proof', async (req, res) => {
 	const UID = req.session.UID;
 	if (!UID) {

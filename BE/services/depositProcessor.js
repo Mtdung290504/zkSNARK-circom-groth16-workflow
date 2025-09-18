@@ -28,16 +28,19 @@ class DepositProcessor {
 
 			let processedCount = 0;
 			let lastProcessedID = newestDepositID;
+
+			// Cắt danh sách giao dịch để chỉ xử lý những giao dịch sau newestDepositID đã lưu
 			let newest_prs = blockchainTransactions.find(({ _id }) => _id === newestDepositID);
 			let newestindex = blockchainTransactions.indexOf(newest_prs);
-
 			const w_transactions = blockchainTransactions.slice(newestindex + 1);
+
 			console.log('newestindex', newestindex);
 			console.log('w_transactions', w_transactions);
 
 			for (const tx of w_transactions) {
 				// Skip if we've already processed this transaction
 				if (newestDepositID && tx._id === newestDepositID) {
+					console.log('Xảy ra kiểu gì được?');
 					break;
 				}
 

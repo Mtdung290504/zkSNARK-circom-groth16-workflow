@@ -59,4 +59,4 @@ template ProvePoR(n, nearestPo2) {
     log("All checks pass:", allChecksPass);
 }
 
-component main { public [ expectedSum, timestamp, finalHash ] } = ProvePoR(1, 2);
+component main { public [ expectedSum, timestamp, finalHash ] } = ProvePoR(2, 2);

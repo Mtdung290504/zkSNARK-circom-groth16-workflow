@@ -1,5 +1,5 @@
 const { parentPort, workerData } = require('worker_threads');
-const { runZKSNARKWorkflow } = require('../complier');
+const { runZKSNARKWorkflow } = require('../compiler');
 const { renderPoRcircuitCount, renderPoRinput } = require('../circuit_renderer');
 
 (async () => {

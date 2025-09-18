@@ -165,7 +165,12 @@ class CircomCompatibleMerkleTree {
 	}
 }
 
-// Hàm build tree từ input data
+/**
+ * Hàm build tree từ input data
+ * 
+ * @param {[UID: number, balance: number][]} input 
+ * @returns {Promise<{ finalHash: string, timestamp: string }>}
+ */
 async function buildMerkleTree(input) {
 	const tree = new CircomCompatibleMerkleTree(input);
 	await tree.init();

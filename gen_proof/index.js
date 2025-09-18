@@ -5,7 +5,7 @@ const { buildMerkleTree } = require('../merkle_tree');
 
 /**
  * Lấy tất cả users từ database và convert về format [UID, balance]
- * @returns {Promise<Array<Array<number>>>} - Mảng các cặp [UID, balance]
+ * @returns {Promise<[UID: number, balance: number][]>} - Mảng các cặp [UID, balance]
  */
 async function getAllUsersForProof() {
 	try {
@@ -18,7 +18,10 @@ async function getAllUsersForProof() {
 
 /**
  * Tạo proof cho dữ liệu đầu vào sử dụng worker thread
+ *
  * @param {Array<Array<number>>} input - Mảng các cặp [UID, balance]
+ * @param {string} finalHash - Final hash từ kết quả chạy tạo Merkle tree
+ * @param {string} timestamp - Timestamp từ kết quả chạy tạo Merkle tree
  * @param {string} circuitPath - Đường dẫn đến circuit file
  * @returns {Promise<any>} - Kết quả từ ZK-SNARK workflow
  */

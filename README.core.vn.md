@@ -75,31 +75,8 @@ Sau khi chạy xong, trong thư mục chứa mạch sẽ có folder `output/` ch
 - `verification_key.json` - Key để verify
 - **3 file trên là những gì verifier cần để xác minh bằng chứng**
 
-## Demo ZK-SNARK từ code
-
-### Blocking version:
-
-```bash
-node .\test_zk-snark_flow\success-but-blocking.test.js
-```
-
-- Import hàm sinh bằng chứng và chạy trực tiếp
-- **Nhược điểm**: Sinh bằng chứng là tác vụ nặng, sẽ chặn luồng chính
-
-### Non-blocking version:
-
-```bash
-node .\test_zk-snark_flow\success-non-blocking.test.js
-```
-
-- Sử dụng worker threads để chạy song song
-- **Ưu điểm**: Không chặn luồng chính
-
 ## Verifier
-
-- Thư mục `verifier/zk-SNARK_verifier/` có thể tách riêng hoàn toàn khỏi dự án
-- Có thể xem như công cụ bên thứ 3 để verify bằng chứng ZKP download từ server
-- Tải lên 3 file trong thư mục `output/` đã đề cập trên để verify
+- Thư mục `verifier/` có thể tách riêng hoàn toàn khỏi dự án vì xem nó như một bên thứ 3 verify bằng chứng, mỗi thư mục con trong đó đều có readme, hãy đọc nó
 
 ## Công nghệ ZK-SNARK được sử dụng
 

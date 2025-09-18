@@ -5,5 +5,12 @@
     "password": "123456",
     "walletAddress": "253bd077aca8330662899a4e3753a5577e34ecd64183e03fe3a05e411242c1c4",
     "balance": 0
+  },
+  {
+    "uid": 2,
+    "username": "mtd",
+    "password": "123456",
+    "walletAddress": "253bd077aca8330662899a4e3753a5577e34ecd64183e03fe3a05e411242c1c4",
+    "balance": 1000
   }
 ]
